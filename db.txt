@@ -81,7 +81,23 @@ CREATE TABLE attendance (
 );
 
 cmd
+Generate requirements.txt
 pip freeze > requirements.txt
+
+Step 3: Install in another environment
+If you or someone else wants to recreate this environment, just run:
+pip install -r requirements.txt
+
+
+git bash
+--------
+git init
+git rm -r --cached myenv
+git add .
+git commit -m "Initial commit - face recognition attendance system"
+git remote add origin https://github.com/Nei-ha/face-recognition-attendance-system.git
+git branch -M main
+git push -u origin main
 
 -- =========================
 -- STUDENT CREDENTIALS TABLE
