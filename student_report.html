@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: url("s-log bg.png");
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            background-repeat: no-repeat;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background:rgb(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+            margin-right: auto;
+            margin-left: 20px;
+            margin-top: 10vh;
+            margin-bottom: auto;
+            justify-content: center;
+            color: white;
+        }
+        .container .main{
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        font-size: 20px;
+        }
+        .logo {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            width: 100px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input {
+            width: calc(100% - 25px);
+        }
+        button {
+            background-color: forestgreen;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: calc(100% - 5px);
+            position: relative;
+        }
+        
+        button:hover {
+            background-color: firebrick;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .icon {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <img src="https://res.cloudinary.com/dnni24ave/image/upload/w_1000/q_auto/f_auto/v1704819982/logos/bit-mesra-logo.png" alt="Logo" class="logo">
+    <div class="container">
+        <h2 class="main" id="main"><i class="fas fa-user-graduate"></i> Student Report</h2>
+        <label for="rollno"><i class="fas fa-id-badge"></i> Enter Roll Number:</label>
+        <input type="text" id="rollno" placeholder="Enter Roll Number">
+        <button onclick="fetchStudentData()">
+            <i class="fas fa-search"></i> Fetch Details
+        </button>
+
+        <h3><i class="fas fa-user"></i> Student Information</h3>
+        <table>
+            <tr><td><strong><i class="fas fa-user"></i> Name:</strong></td><td id="name"></td></tr>
+            <tr><td><strong><i class="fas fa-university"></i> Branch:</strong></td><td id="branch"></td></tr>
+            <tr><td><strong><i class="fas fa-book"></i> Semester:</strong></td><td id="semester"></td></tr>
+            <tr><td><strong><i class="fas fa-layer-group"></i> Section:</strong></td><td id="section"></td></tr>
+            <tr><td><strong><i class="fas fa-image"></i> Photo:</strong></td><td><img id="photo" src="" alt="Student Photo"></td></tr>
+        </table>
+
+        <h3><i class="fas fa-calendar-check"></i> Attendance Report</h3>
+        <table id="attendanceTable">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-id-card"></i> Course Id</th>
+                    <th><i class="fas fa-book-open"></i> Course</th>
+                    <th><i class="fas fa-user-check"></i> Classes Attended</th>
+                    <th><i class="fas fa-percentage"></i> Attendance</th>
+                    <th><i class="fas fa-user-times"></i> Unattended Classes</th>
+                    <th><i class="fas fa-calendar"></i> Total Classes</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function fetchStudentData() {
+            const rollno = document.getElementById("rollno").value;
+            if (!rollno) {
+                alert("Please enter a roll number!");
+                return;
+            }
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/get_student_info?rollno=${rollno}`);
+                const data = await response.json();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                document.getElementById("name").innerText = data.student.name;
+                document.getElementById("branch").innerText = data.student.branch;
+                document.getElementById("semester").innerText = data.student.semester;
+                document.getElementById("section").innerText = data.student.section;
+                document.getElementById("photo").src = data.student.image_url || "placeholder.jpg";
+                const tableBody = document.getElementById("attendanceTable").querySelector("tbody");
+                tableBody.innerHTML = "";
+                data.attendance.forEach(record => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${record.course_id}</td>
+                        <td>${record.course_name}</td>
+                        <td>${record.classes_attended}</td>
+                        <td>${record.percentage ? record.percentage.toFixed(2) + '%' : 'N/A'}</td>
+                        <td>${record.unattended_classes}</td>
+                        <td>${record.total_classes}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                alert("Failed to fetch student data.");
+            }
+        }
+    </script>
+</body>
+</html>

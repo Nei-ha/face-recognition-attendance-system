@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+         html, body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+         }
+         .banner {
+            margin-top: 70px;
+         }
+        .band {
+            width:100%;
+            height: 20px;
+            margin: 0;
+            margin-top: -10px;
+            background: linear-gradient(to left, darkblue, dodgerblue, darkblue);
+        }
+        .logo {
+            display: flex;
+            justify-content: center;
+            margin-top: -70px;
+        }
+        .logo img {
+            width: 90px;
+            height: auto;
+            padding: 1%;
+            background-color: white;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            width: 100%;
+            row-gap: 10px;
+            column-gap: 30px; 
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            overflow: auto;
+            padding-bottom: 30px;
+            min-height: 70vh;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 85%;
+            height: 50%;
+            background: whitesmoke ;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            height: 60vh;
+        }
+        form{
+            width: 100%;
+            align-items: center;
+        }
+        
+        input[type=text],input[type="email"], select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid azure;
+            margin-top: 6px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            background-color: snow;
+            border-radius: 2px;
+            box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        button {
+            background-color: dodgerblue;
+            border: 2px solid skyblue;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        
+        button:hover {
+            background-color: dodgerblue;
+            border: 2px solid skyblue;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        var choice = prompt("Enter 1 to ADD FACULTY or 2 to ADD STUDENT:");
+        
+        if (choice == "1") {
+    var facultyID = prompt("Enter your Faculty ID:");
+
+    if (!facultyID) {
+        alert("Faculty ID is required.");
+        location.reload();
+    } else {
+        fetch(`http://127.0.0.1:5002/check_faculty?faculty_id=${facultyID}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.valid) {
+                sessionStorage.setItem("faculty_id", facultyID);
+                alert("Faculty ID is valid. Proceed with adding details.");
+
+                setTimeout(() => {
+                    document.getElementById("faculty_id").value = facultyID;
+                    document.getElementById("facultyFormDiv").style.display = "block";
+                    document.getElementById("studentFormDiv").style.display = "none";
+                }, 0);
+                
+            } else {
+                alert("Invalid Faculty ID! Contact admin.");
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Server error. Try again later.");
+            location.reload();
+        });
+    }
+}
+else if (choice == "2") {
+            document.addEventListener("DOMContentLoaded", function() {
+                document.getElementById("facultyFormDiv").style.display = "none";
+                document.getElementById("studentFormDiv").style.display = "block";
+            });
+        } else {
+            alert("Invalid choice! Refresh and enter 1 or 2.");
+            document.body.innerHTML = "";
+        }
+    </script>
+    
+    <div id="studentFormDiv" style="display: none;">
+        <div class="banner">
+            <div class ="band"> </div>
+            <div class= "logo">
+                <img src="https://res.cloudinary.com/dnni24ave/image/upload/w_1000/q_auto/f_auto/v1704819982/logos/bit-mesra-logo.png" alt="BIT Logo">
+            </div>
+        </div>
+        <div class="container">
+            <h2>New Student Registration</h2>
+            <div class="column">
+                <form id="studentForm">
+                    <div class="form-grid">
+                        <div class="full-width">
+                            <label for="s_name">Full Name</label>
+                            <input type="text" id="s_name" placeholder="Enter your full name" required>
+                        </div>
+                        <div>
+                            <label for="s_roll">Roll No.</label>
+                            <input type="text" id="s_rollno" placeholder="Enter your roll no" required>
+                        </div>
+                        <div>
+                            <label for="s_branch">Branch</label>
+                            <input type="text" id="s_branch" placeholder="BBA/BCA" required>
+                        </div>
+                        <div>
+                            <label for="s_semester">Semester</label>
+                            <input type="text" id="s_semester" placeholder="Enter your semester" required>
+                        </div>
+                        <div>
+                            <label for="s_section">Section</label>
+                            <input type="text" id="s_section" placeholder="Enter your section" required>
+                        </div>    
+                        <div>
+                            <label for="s_contact">Contact</label>
+                            <input type="text" id="s_contact" placeholder="Enter your phone number" required>
+                        </div>
+                        <div>
+                            <label for="s_username">Username</label>
+                            <input type="email" id="s_username" placeholder="Enter your email" required>
+                        </div>
+                        <div class="full-width">
+                            <button type="submit">Add Student</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    
+    <div id="facultyFormDiv" style="display: none;">
+        <div class="banner">
+            <div class="band"></div>
+            <div class="logo">
+                <img src="https://res.cloudinary.com/dnni24ave/image/upload/w_1000/q_auto/f_auto/v1704819982/logos/bit-mesra-logo.png" alt="BIT Logo">
+            </div>
+        </div>
+        <div class="container">
+            <h2>New Faculty Registration</h2>
+            <div class="column">
+                <form id="facultyForm">
+                    <div class="form-grid">
+                        <div class="full-width">
+                            <label for="faculty_name">Full Name</label>
+                            <input type="text" id="faculty_name" placeholder="Enter your name" required>
+                        </div>
+                        <div class="full-width">
+                            <label for="faculty_id">Faculty ID</label>
+                            <input type="text" id="faculty_id" placeholder="Enter your Faculty ID" required>
+                        </div>
+                        <div>
+                            <label for="faculty_contact">Contact</label>
+                            <input type="text" id="faculty_contact" placeholder="Enter your contact number" required>
+                        </div>
+                        <div>
+                            <label for="faculty_username">Username</label>
+                            <input type="email" id="faculty_username" placeholder="Enter your email" required>
+                        </div>
+                        <div class="full-width">
+                            <button type="submit">Add Faculty</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    
+    
+
+    <div id="message"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script>
+        var socket = io.connect("http://127.0.0.1:5002");
+
+        document.getElementById("studentForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            socket.emit("add_student", {
+                name: student_name.value,
+                rollno: student_rollno.value,
+                branch: student_branch.value,
+                semester: student_semester.value,
+                section: student_section.value,
+                contact: student_contact.value,
+                username: student_username.value
+            });
+            console.log("Student form submitted.");
+        });
+
+        document.getElementById("facultyForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            socket.emit("add_faculty", {
+                name: faculty_name.value,
+                faculty_id: faculty_id.value,
+                contact: faculty_contact.value,
+                username: faculty_username.value
+            });
+            console.log("Faculty form submitted.");
+        });
+
+        socket.on("message", function(data) {
+            console.log("Message received:", data);
+            document.getElementById("message").innerText = data.msg;
+    });
+
+    </script>
+</body>
+</html>

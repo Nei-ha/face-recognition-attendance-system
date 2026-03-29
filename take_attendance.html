@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+    <style>
+        body {
+
+            
+            background-image: url("face bg.png");
+            background-size: cover;
+
+            background-repeat: no-repeat;
+        }
+        .div1 {
+    color: white;
+    height: 100px;
+    width: 1000px;
+    margin: 0 auto; /* center horizontally */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 70px;
+    font-family: impact;
+    font-weight: bold;
+    overflow: hidden;
+    position: relative;
+}
+
+.marquee-text {
+    font-size: 70px;
+    font-family: Impact, 'Bookman', "URW Bookman L", serif;
+    font-weight: bold;
+    color: white;
+    -webkit-text-stroke: 1px dodgerblue;
+    white-space: nowrap;
+}
+
+
+
+        .div2 {
+
+            height: 570px;
+            width: 1000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            flex-direction: column;
+            color: white;
+        }
+        h2 {
+            padding-top: 20px;
+            font-size: 4rem;
+            max-width: 600px;
+            line-height: 60px;
+            -webkit-text-stroke: 1px dodgerblue;
+            margin-left: auto;
+            margin-right: auto;
+            
+            font-family: 'Bookman', "URW Bookman L", serif;
+        }
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            width: 100px;
+        }
+                /* Heading form styling */
+                #up {
+        position: absolute;
+        top: 5%; /* Position the form in the center vertically */
+        left: 10px; /* Position the form on the left side */
+        width: 280px;
+        background: rgba(149, 2, 2, 0.973);
+        padding:  13px;
+        display: block; /* Align all elements in a single column */
+        font-weight: bold;
+        font-size: 14px;
+        color: white;
+                    }
+        /* Form styling */
+                
+        #attendanceForm {
+        position: absolute;
+        top: 12%; /* Position the form in the center vertically */
+        left: 10px; /* Position the form on the left side */
+        background: rgb(0, 0, 0, 0.6);
+        padding: 15px;
+        border-radius: 5px;
+        display: block; /* Align all elements in a single column */
+        font-weight: bold;
+        color: white;
+    }
+
+    #attendanceForm label,
+    #attendanceForm input {
+        display: block; /* Stack the labels and inputs vertically */
+        width: 100%; /* Make inputs take full width */
+        margin-bottom: 10px; /* Space between elements */
+        box-sizing: border-box; /* Prevent input overflow */
+        font-weight: bold;
+        font-size: 19px;
+    }
+
+
+    input {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 12px;
+    width: calc(100% - 25px);
+}
+
+        button {
+      /* Ensure the button is displayed in the same column */     
+    margin-top: 20px auto 0 auto; 
+    width: 100%;
+    font-size: 14px;
+    padding: 10px 20px;
+    background-color: rgb(5, 252, 5,0.9);  
+    color: white;             
+    border: none;
+    border-radius: 5px;       
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Pop-up effect */
+}
+
+        button:hover,
+        button:active {
+            background-color: darkgreen;  
+            transform: scale(1.1); /* Increases size on hover */
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3); /* Enhances pop-up effect */
+        }
+        #statusMessageTitle {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+
+#statusMessage {
+            position: absolute;
+            top: 70%;
+            left: 50%;
+            width: 80%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+            display: none; /* Hide initially */
+            
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center the image horizontally */
+    text-align: left; /* Ensure text aligns left */
+        }
+
+        #statusImage {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 10px auto; /* Center image and add space below */
+            display: block; /* Ensures it starts on a new line */
+        }
+
+        #statusText {
+            width: 100%; /* Make sure text takes full width */
+    text-align: left; /* Align text to the left */
+    padding: 0 10px; /* Add slight padding */
+        }
+        img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .icon {
+            margin-right: 5px;
+        }
+        #show {
+                display: none; /* Hide by default */
+            }
+
+    </style>
+</head>
+<body style="background-color: black;">
+    <div id="show">
+        <div>
+            <img src="https://res.cloudinary.com/dnni24ave/image/upload/w_1000/q_auto/f_auto/v1704819982/logos/bit-mesra-logo.png" alt="BIT Mesra Logo" class="logo">
+            
+        </div> <br>
+    <div style="position: relative; width: 480px; height: 690px; float: right;">
+        
+
+        <!-- This div will display messages from att.py -->
+        <div id="statusMessage"><br><br>
+            <div id="statusMessageTitle">STATUS</div>
+
+            <img id="statusImage" src="" alt="Status Image">
+            <p id="statusText"></p>
+        </div>
+    </div>
+    
+    <div class="div1">
+        <marquee behavior="scroll" direction="left" scrollamount="10">
+            <h2>AUTO ATTENDANCE</h2>
+        </marquee>
+    </div><br>
+    
+
+    <div class="div2">
+        <div id="up">FILL DETAILS</div>
+        <form id="attendanceForm">
+            <label for="faculty_id">FACULTY ID:</label>
+            <input type="text" id="faculty_id" name="faculty_id" required><br>
+    
+            <label for="course_id"><i class="fas fa-book"></i>COURSE ID:</label>
+            <input type="text" id="course_id" name="course_id" required placeholder="Enter Course Code"><br>
+    
+            <label for="section"><i class="fas fa-users"></i>SECTION:</label>
+            <input type="text" id="section" placeholder="Enter Section" name="section" required><br>
+    
+            <label for="num_classes">NO. OF CLASSES:</label>
+            <input type="number" id="num_classes" name="num_classes" required><br>
+    
+            <button type="button" id="startAttendance">START ATTENDANCE</button>
+        </form>
+
+
+    </div>
+</div>
+<audio id="thankyouSound" src="thankyou.wav" preload="auto"></audio>
+
+<audio id="warningSound" src="warning.mp3" preload="auto"></audio>
+
+
+    <script>
+                document.addEventListener("DOMContentLoaded", function () {
+            let userRole = sessionStorage.getItem("role");
+            if (userRole !== "admin" && userRole !== "faculty") {
+                alert("Access denied! Redirecting to home.");
+                window.location.href = "home.html";
+            } else {
+            // Show the faculty report section if the role is valid
+            document.getElementById("show").style.display = "block";
+        }
+        });
+        document.getElementById("startAttendance").addEventListener("click", function() {
+            const formData = {
+                faculty_id: document.getElementById("faculty_id").value,
+                course_id: document.getElementById("course_id").value,
+                section: document.getElementById("section").value,
+                num_classes: document.getElementById("num_classes").value
+            };
+                // ✅ Alert user that the process has started
+    alert("Attendance process started.");
+
+            fetch("http://127.0.0.1:5001/start_attendance", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())  // Expecting JSON response
+            .then(data => {
+                let statusDiv = document.getElementById("statusMessage");
+                let statusText = document.getElementById("statusText");
+                let statusImage = document.getElementById("statusImage");
+
+                // Clear previous content
+                statusText.textContent = "";
+                statusImage.src = "";
+
+                // Set new content
+                if (data.message) {
+                    statusText.textContent = data.message;
+                }
+
+                if (data.image) {
+                    statusImage.src = data.image;  // Set status image
+                    statusImage.style.display = "block";  // Ensure image is visible
+                }
+
+
+                
+
+                // Show statusMessage div only if both message and image are present
+                if (statusText.textContent.trim() !== "" && statusImage.src.trim() !== "") {
+                    statusDiv.style.display = "block";  // Show div
+                } else {
+                    statusDiv.style.display = "none";  // Hide div if no content
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                let statusDiv = document.getElementById("statusMessage");
+                statusDiv.innerHTML = `<p style="color: red;">Failed to fetch response.</p>`;
+            });
+        });
+
+        // WebSocket connection
+        const socket = io("http://127.0.0.1:5001");
+
+        socket.on("attendance_status", function(data) {
+            console.log("Received event:", data); // Debugging
+
+            let statusDiv = document.getElementById("statusMessage");
+            let statusImage = document.getElementById("statusImage");
+            let statusText = document.getElementById("statusText");
+
+            // Clear previous content
+            statusText.textContent = "";
+            statusImage.src = "";
+
+            // Set new content
+            if (data.message) {
+                statusText.textContent = data.message;
+            }
+
+            if (data.image) {
+                statusImage.src = data.image;  // Set status image
+                statusImage.style.display = "block";  // Ensure image is visible
+            }
+
+        // 🔊 Play sound ONLY when marked
+        if (data.play_sound) {
+            const audio = document.getElementById("thankyouSound");
+            audio.currentTime = 0; // Reset to start
+            audio.play();
+        }
+
+            // 🔊 Play warning sound ONLY if phone screen is detected
+            if (data.phone_detected) {
+                const warningAudio = document.getElementById("warningSound");
+                warningAudio.play();
+            }
+            // Show statusMessage div only if both message and image are present
+            if (statusText.textContent.trim() !== "" && statusImage.src.trim() !== "") {
+                statusDiv.style.display = "block";  // Show div
+            } else {
+                statusDiv.style.display = "none";  // Hide div if no content
+            }
+        });
+        
+    </script>
+</body>
+</html>

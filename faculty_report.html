@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <style>
+        
+        html, body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: url("f-log bg.png");
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            background-repeat: no-repeat;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: rgb(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+            margin-left: auto;
+            font-size: 13px;
+            color: white;
+        }
+        .container .main{
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        font-size: 20px;
+        }
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            width: 100px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        input {
+            width: calc(100% - 25px);
+        }
+        button {
+            background-color: forestgreen;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: calc(100% - 5px);
+            position: relative;
+        }
+        button:hover {
+            background-color: firebrick;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .icon {
+            margin-right: 5px;
+        }
+        #show {
+                display: none; /* Hide by default */
+            }
+        
+    </style>
+</head>
+<body>
+    <div id="show">
+<div>
+    <img src="https://res.cloudinary.com/dnni24ave/image/upload/w_1000/q_auto/f_auto/v1704819982/logos/bit-mesra-logo.png" alt="Logo" class="logo">
+</div> <br>
+
+<div class="container">
+    <h2 class="main" id="main"><i class="fas fa-chalkboard-teacher"></i> Faculty Report</h2>
+    
+    <label for="course_id"><i class="fas fa-book"></i> Enter Course Code:</label>
+    <input type="text" id="course_id" placeholder="Enter Course Code">
+
+    <label for="branch"><i class="fas fa-university"></i> Enter Branch:</label>
+    <input type="text" id="branch" placeholder="Enter Branch">
+
+    <label for="semester"><i class="fas fa-layer-group"></i> Enter Semester:</label>
+    <input type="text" id="semester" placeholder="Enter Semester">
+
+    <label for="section"><i class="fas fa-users"></i> Enter Section:</label>
+    <input type="text" id="section" placeholder="Enter Section">
+    
+    <button onclick="fetchFacultyData()">
+        <i class="fas fa-search"></i> Fetch Faculty Details
+    </button>
+
+    <h3><i class="fas fa-user-tie"></i> Faculty Information</h3>
+    <table>
+        <tr>
+            <td><strong><i class="fas fa-id-badge"></i> Faculty Id:</strong></td>
+            <td id="faculty_id"></td>
+        </tr>
+        <tr>
+            <td><strong><i class="fas fa-user"></i> Name:</strong></td>
+            <td id="name"></td>
+        </tr>
+        <tr>
+            <td><strong><i class="fas fa-image"></i> Photo:</strong></td>
+            <td><img id="photo" src="" alt="Faculty Photo"></td>
+        </tr>
+    </table>
+
+    <h3><i class="fas fa-user-check"></i> Students Attendance Above 75%</h3>
+    <table id="attendanceAbove75">
+        <thead>
+            <tr>
+                <th><i class="fas fa-id-card"></i> Roll No.</th>
+                <th><i class="fas fa-user"></i> Name</th>
+                <th><i class="fas fa-phone"></i> Contact</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h3><i class="fas fa-user-times"></i> Students Attendance Below 75%</h3>
+    <table id="attendanceBelow75">
+        <thead>
+            <tr>
+                <th><i class="fas fa-id-card"></i> Roll No.</th>
+                <th><i class="fas fa-user"></i> Name</th>
+                <th><i class="fas fa-phone"></i> Contact</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+</div>
+<script>
+            document.addEventListener("DOMContentLoaded", function () {
+            let userRole = sessionStorage.getItem("role");
+            if (userRole !== "admin" && userRole !== "faculty") {
+                alert("Access denied! Redirecting to home.");
+                window.location.href = "home.html";
+            } else {
+            // Show the faculty report section if the role is valid
+            document.getElementById("show").style.display = "block";
+        }
+        });
+    async function fetchFacultyData() {
+        const course_id = document.getElementById("course_id").value;
+        const branch = document.getElementById("branch").value;
+        const semester = document.getElementById("semester").value;
+        const section = document.getElementById("section").value;
+
+        if (!course_id || !branch || !semester || !section) {
+            alert("Please fill in all fields!");
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/get_faculty_info?course_id=${course_id}&branch=${branch}&semester=${semester}&section=${section}`);
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            document.getElementById("faculty_id").innerText = data.faculty.faculty_id;
+            document.getElementById("name").innerText = data.faculty.name;
+            document.getElementById("photo").src = data.faculty.image_url || "placeholder.jpg";
+
+            populateAttendanceTable("attendanceAbove75", data.attendanceAbove75);
+            populateAttendanceTable("attendanceBelow75", data.attendanceBelow75);
+
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            alert("Failed to fetch faculty data.");
+        }
+    }
+
+    function populateAttendanceTable(tableId, records) {
+        const tableBody = document.getElementById(tableId).querySelector("tbody");
+        tableBody.innerHTML = "";
+
+        records.forEach(record => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${record.rollno}</td>
+                <td>${record.name}</td>
+                <td>${record.contact}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+</script>
+
+</body>
+</html>

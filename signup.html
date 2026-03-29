@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+         html, body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+         }
+         .banner {
+            margin-top: 70px;
+         }
+        .band {
+            width:100%;
+            height: 20px;
+            margin: 0;
+            margin-top: -10px;
+            background: linear-gradient(to left, darkblue, dodgerblue, darkblue);
+        }
+        .logo {
+            display: flex;
+            justify-content: center;
+            margin-top: -70px;
+        }
+        .logo img {
+            width: 90px;
+            height: auto;
+            padding: 1%;
+            background-color: white;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            width: 100%;
+            row-gap: 10px;
+            column-gap: 30px; 
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            overflow: auto;
+            padding-bottom: 30px;
+            min-height: 70vh;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 85%;
+            height: 50%;
+            background: whitesmoke ;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            height: 60vh;
+        }
+        form{
+            width: 100%;
+            align-items: center;
+        }
+        
+        input[type=text],input[type="email"], select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid azure;
+            margin-top: 6px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            background-color: snow;
+            border-radius: 2px;
+            box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        button {
+            background-color: dodgerblue;
+            border: 2px solid skyblue;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        
+        button:hover {
+            background-color: dodgerblue;
+            border: 2px solid skyblue;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const choice = prompt("Enter:\n1 - Add Faculty\n2 - Add Student\n0 - Exit");
+    
+        if (choice === "0") {
+            alert("Exited.");
+            throw new Error("User exited.");
+        }
+    
+        if (choice !== "1" && choice !== "2") {
+            alert("❌ Invalid choice. Please refresh and enter 1, 2, or 0.");
+            location.reload();
+        }
+    
+        const email = prompt("Enter your email address:");
+        if (!email || !email.includes("@")) {
+            alert("❌ Invalid email. Please refresh and try again.");
+            location.reload();
+        }
+    
+        const socket = io.connect("http://127.0.0.1:5002", {
+            timeout: 5000,
+            reconnectionAttempts: 3
+        });
+    
+        socket.on("connect_error", () => {
+            alert("❌ Could not connect to the server. Make sure it’s running.");
+        });
+    
+        socket.emit("send_otp", { email });
+    
+        socket.on("otp_sent", function () {
+            let attempts = 3;
+    
+            function promptOtp() {
+                let otp = prompt(`✅ OTP sent to ${email}.\nAttempts left: ${attempts}\nEnter the OTP:`);
+    
+                if (!otp || otp.length < 4) {
+                    alert("❌ Invalid OTP input.");
+                    attempts--;
+                    if (attempts > 0) {
+                        promptOtp();
+                    } else {
+                        alert("❌ Too many failed attempts. Reloading...");
+                        location.reload();
+                    }
+                    return;
+                }
+    
+                socket.emit("verify_otp", { email, otp });
+            }
+    
+            promptOtp();
+        });
+    
+        socket.on("otp_verified", function (data) {
+            if (data.success) {
+                alert("✅ OTP verified successfully!");
+    
+                if (choice === "1") {
+                    document.getElementById("facultyFormDiv").style.display = "block";
+                    document.getElementById("faculty_username").value = email;
+                } else {
+                    document.getElementById("studentFormDiv").style.display = "block";
+                    document.getElementById("student_username").value = email;
+                }
+            } else {
+                alert("❌ Invalid or expired OTP. Reloading...");
+                location.reload();
+            }
+        });
+    </script>
+    
+    <div id="studentFormDiv" style="display: none;">
+        <div class="banner">
+            <div class ="band"> </div>
+            <div class= "logo">
+                <img src="https://res.cloudinary.com/dnni24ave/image/upload/w_1000/q_auto/f_auto/v1704819982/logos/bit-mesra-logo.png" alt="BIT Logo">
+            </div>
+        </div>
+        <div class="container">
+            <h2>New Student Registration</h2>
+            <div class="column">
+                <form id="studentForm">
+                    <div class="form-grid">
+                        <div class="full-width">
+                            <label for="student_name">Full Name</label>
+                            <input type="text" id="student_name" placeholder="Enter your full name" required>
+                        </div>
+                        <div>
+                            <label for="student_roll">Roll No.</label>
+                            <input type="text" id="student_rollno" placeholder="Enter your roll no" required>
+                        </div>
+                        <div>
+                            <label for="student_branch">Branch</label>
+                            <input type="text" id="student_branch" placeholder="BBA/BCA" required>
+                        </div>
+                        <div>
+                            <label for="student_semester">Semester</label>
+                            <input type="text" id="student_semester" placeholder="Enter your semester" required>
+                        </div>
+                        <div>
+                            <label for="student_section">Section</label>
+                            <input type="text" id="student_section" placeholder="Enter your section" required>
+                        </div>    
+                        <div>
+                            <label for="student_contact">Contact</label>
+                            <input type="text" id="student_contact" placeholder="Enter your phone number" required>
+                        </div>
+                        <div>
+                            <label for="student_username">Username</label>
+                            <input type="email" id="student_username" placeholder="Enter your email" required>
+                        </div>
+                        <div class="full-width">
+                            <button type="submit">Add Student</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    
+    <div id="facultyFormDiv" style="display: none;">
+        <div class="banner">
+            <div class="band"></div>
+            <div class="logo">
+                <img src="https://res.cloudinary.com/dnni24ave/image/upload/w_1000/q_auto/f_auto/v1704819982/logos/bit-mesra-logo.png" alt="BIT Logo">
+            </div>
+        </div>
+        <div class="container">
+            <h2>New Faculty Registration</h2>
+            <div class="column">
+                <form id="facultyForm">
+                    <div class="form-grid">
+                        <div class="full-width">
+                            <label for="faculty_name">Full Name</label>
+                            <input type="text" id="faculty_name" placeholder="Enter your name" required>
+                        </div>
+                        <div class="full-width">
+                            <label for="faculty_id">Faculty ID</label>
+                            <input type="text" id="faculty_id" placeholder="Enter your Faculty ID" required>
+                        </div>
+                        <div>
+                            <label for="faculty_contact">Contact</label>
+                            <input type="text" id="faculty_contact" placeholder="Enter your contact number" required>
+                        </div>
+                        <div>
+                            <label for="faculty_username">Username</label>
+                            <input type="email" id="faculty_username" placeholder="Enter your email" required>
+                        </div>
+                        <div class="full-width">
+                            <button type="submit">Add Faculty</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    
+    
+
+    <div id="message"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+<script>
+    const socket2 = io.connect("http://127.0.0.1:5002");
+
+    document.getElementById("studentForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        socket2.emit("add_student", {
+            name: student_name.value,
+            rollno: student_rollno.value,
+            branch: student_branch.value,
+            semester: student_semester.value,
+            section: student_section.value,
+            contact: student_contact.value,
+            username: student_username.value
+        });
+    });
+
+    document.getElementById("facultyForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        socket2.emit("add_faculty", {
+            name: faculty_name.value,
+            faculty_id: faculty_id.value,
+            contact: faculty_contact.value,
+            username: faculty_username.value
+        });
+    });
+
+    // Display interim messages from backend
+    socket2.on("message", function(data) {
+        const msgDiv = document.getElementById("message");
+        msgDiv.innerText = data.msg;
+        msgDiv.style.color = "darkblue";
+        msgDiv.style.fontWeight = "bold";
+        msgDiv.style.textAlign = "center";
+        msgDiv.style.marginTop = "5px";
+        msgDiv.style.fontSize = "2rem";
+    });
+
+    // Final completion message triggers redirect
+    socket2.on("registration_complete", function() {
+        alert("✅ Registration successful!\nRedirecting to login page in 3 seconds...");
+        setTimeout(() => {
+            window.location.href = "login.html"; // Replace with actual login path
+        }, 3000);
+    });
+</script>
+</body>
+</html>

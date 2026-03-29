@@ -1,0 +1,171 @@
+Database Pswd- N@ha11Thais20
+
+-- =========================
+-- STUDENT TABLE
+-- =========================
+CREATE TABLE student (
+    name TEXT NOT NULL,
+    rollno TEXT PRIMARY KEY,
+    branch TEXT NOT NULL,
+    semester INT NOT NULL,
+    section TEXT NOT NULL,
+    contact TEXT NOT NULL
+);
+
+-- =========================
+-- FACULTY TABLE
+-- =========================
+CREATE TABLE faculty (
+    name TEXT NOT NULL,
+    faculty_id TEXT PRIMARY KEY,
+    contact TEXT NOT NULL,
+    image_url TEXT
+);
+
+-- =========================
+-- COURSE TABLE
+-- =========================
+CREATE TABLE course (
+    course_id TEXT PRIMARY KEY,
+    course_name TEXT NOT NULL,
+    branch TEXT NOT NULL,
+    semester INT
+);
+
+-- =========================
+-- STUDENT ENROLLED TABLE
+-- =========================
+CREATE TABLE student_enrolled (
+    rollno TEXT,
+    branch TEXT,
+    semester INT,
+    section TEXT,
+    course_id TEXT,
+    faculty_id TEXT,
+    PRIMARY KEY (rollno, course_id),
+    FOREIGN KEY (rollno) REFERENCES student(rollno) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES course(course_id) ON DELETE CASCADE,
+    FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id) ON DELETE SET NULL
+);
+
+-- =========================
+-- FACULTY ENROLLED TABLE
+-- =========================
+CREATE TABLE faculty_enrolled (
+    faculty_id TEXT,
+    course_id TEXT,
+    branch TEXT,
+    semester INT,
+    section TEXT,
+    PRIMARY KEY (faculty_id, course_id, section),
+    FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES course(course_id) ON DELETE CASCADE
+);
+
+-- =========================
+-- ATTENDANCE TABLE
+-- =========================
+CREATE TABLE attendance (
+    rollno TEXT,
+    course_id TEXT,
+    section TEXT,
+    faculty_id TEXT,
+    classes_attended INT DEFAULT 0,
+    total_classes INT DEFAULT 0,
+    percentage FLOAT DEFAULT 0,
+    unattended_classes INT DEFAULT 0,
+    PRIMARY KEY (rollno, course_id),
+    FOREIGN KEY (rollno) REFERENCES student(rollno) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES course(course_id) ON DELETE CASCADE,
+    FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id) ON DELETE SET NULL
+);
+
+cmd
+pip freeze > requirements.txt
+
+-- =========================
+-- STUDENT CREDENTIALS TABLE
+-- =========================
+CREATE TABLE student_credentials (
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    rollno TEXT UNIQUE,
+    role TEXT,
+    FOREIGN KEY (rollno) REFERENCES student(rollno) ON DELETE CASCADE
+);
+
+-- =========================
+-- FACULTY CREDENTIALS TABLE
+-- =========================
+CREATE TABLE faculty_credentials (
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    faculty_id TEXT UNIQUE,
+    role TEXT,
+    FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id) ON DELETE CASCADE
+);
+
+-- FUNCTION
+CREATE OR REPLACE FUNCTION set_student_password()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.password := NEW.rollno;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- TRIGGER
+CREATE TRIGGER trigger_set_student_password
+BEFORE INSERT ON student_credentials
+FOR EACH ROW
+EXECUTE FUNCTION set_student_password();
+
+-- FUNCTION
+CREATE OR REPLACE FUNCTION set_faculty_password()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.password := NEW.faculty_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- TRIGGER
+CREATE TRIGGER trigger_set_faculty_password
+BEFORE INSERT ON faculty_credentials
+FOR EACH ROW
+EXECUTE FUNCTION set_faculty_password();
+
+-- FUNCTION
+CREATE OR REPLACE FUNCTION update_percentage()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.total_classes = 0 THEN
+        NEW.percentage := 0;
+    ELSE
+        NEW.percentage := (NEW.classes_attended * 100.0) / NEW.total_classes;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- TRIGGER
+CREATE TRIGGER trigger_update_percentage
+BEFORE INSERT OR UPDATE ON attendance
+FOR EACH ROW
+EXECUTE FUNCTION update_percentage();
+
+-- FUNCTION
+CREATE OR REPLACE FUNCTION update_unattended_classes()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.unattended_classes := NEW.total_classes - NEW.classes_attended;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- TRIGGER
+CREATE TRIGGER trigger_update_unattended
+BEFORE INSERT OR UPDATE ON attendance
+FOR EACH ROW
+EXECUTE FUNCTION update_unattended_classes();

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Manager</title>
+    <style>
+        :root {
+            --background-image: url('L-bg.jpg');
+            --logo-image: url('https://res.cloudinary.com/dnni24ave/image/upload/w_1000/q_auto/f_auto/v1704819982/logos/bit-mesra-logo.png');
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background: var(--background-image) no-repeat center center/cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .main {
+            display: flex;
+            width: 85%;
+            height: 80%;
+            background: rgb(0, 0, 0, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px black;
+        }
+        
+        .info-box {
+            width: 60%;
+            padding: 40px;
+            color: white;
+        }
+        
+        .logo {
+            display: block;
+            margin: 0 auto 20px auto;
+            width: 100px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 15px black;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        p {
+            font-size: 12px;
+        }
+        
+        .login-box {
+            margin-right: 30px;
+            margin-top: 50px;
+            background: rgb(0, 0, 0, 0.6);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            width: 40%;
+            height: 70%;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 6px;
+        }
+        
+        .btn-login {
+            background-color: dodgerblue;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 105%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        
+        .btn-login:hover {
+            background-color: darkblue;
+        }
+
+        
+            .links {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+    }
+
+    .links a {
+        color: whitesmoke;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .links a:hover {
+        text-decoration: underline;
+    }
+
+    </style>
+    
+    <script>
+        let loginType = ''; 
+    
+        function setLoginType(type) {
+            loginType = type;
+            const studentBtn = document.getElementById('student-btn');
+            const facultyBtn = document.getElementById('faculty-btn');
+    
+            if (type === 'student') {
+                studentBtn.style.backgroundColor = 'dodgerblue';
+                facultyBtn.style.backgroundColor = 'white';
+                facultyBtn.style.color = 'black';
+            } else {
+                facultyBtn.style.backgroundColor = 'dodgerblue';
+                studentBtn.style.backgroundColor = 'white';
+                studentBtn.style.color = 'black';
+            }
+
+            document.getElementById('login-btn').disabled = false; 
+        }
+
+    
+        async function validateLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!loginType) {
+                alert('Select Login Type first!!');
+                return;
+            }
+
+            if (!username || !password) {
+                alert('Please fill in both Username and Password fields.');
+                return;
+            }
+
+            try {
+                let response = await fetch('http://127.0.0.1:5000/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, login_type: loginType })
+                });
+
+                let result = await response.json();
+
+                if (response.ok) {
+                    // Store role and username in sessionStorage
+                    sessionStorage.setItem("role", result.role);
+                    sessionStorage.setItem("username", result.username);
+
+                    alert('Login Successful!');
+                    window.location.href = 'home.html';
+                } else {
+                    alert('Incorrect Credentials');
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert('Login failed. Please try again.');
+            }
+        }
+
+
+    
+        function handleForgotPassword() {
+            const username = document.getElementById('username').value.trim();
+    
+            if (!username) {
+                alert('Please enter your Username.');
+                return;
+            }
+    
+            if (loginType === 'student') {
+                alert('Your password is your Roll Number!');
+            } else if (loginType === 'faculty') {
+                alert('Your password is your Faculty Id.');
+            }
+        }
+    </script>
+    
+</head>
+<body>
+    <div class="main">
+        <div class="info-box">
+            <img src="https://res.cloudinary.com/dnni24ave/image/upload/w_1000/q_auto/f_auto/v1704819982/logos/bit-mesra-logo.png" class="logo" alt="BIT Logo">
+            <h1>BIRLA INSTITUTE OF TECHNOLOGY, MESRA</h1>
+            <h3>Institute Vision</h3>
+            <p>To become a globally recognized academic institution in consonance with the social, economic and ecological environment,
+                striving continuously for excellence in education, research and technological service to the national needs.</p>
+            <h3>Institute Mission</h3>
+            <p>1. To educate students at Undergraduate, Post Graduate, Doctoral and Post Doctoral levels to perform challenging
+                engineering and managerial jobs in industry.</p>
+            <p>2. To provide excellent research and development facilities to take up Ph.D programmes and research projects.</p>
+            <p>3. To develop effective teaching and learning skills and state-of-the-art research potential of the faculty.</p>
+            <p>4. To build national capabilities in technology, education and research in emerging areas.</p>
+            <p>5. To provide excellent technological services to satisfy the requirements of the industry
+                and overall academic needs of society.</p>
+        </div>
+        <div class="login-box">
+            <h2>Attendance Management System</h2>
+            <h2>Welcome! Please login to continue.</h2>
+
+            <!-- User Type Selection -->
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                <button id="student-btn" class="btn-login" onclick="setLoginType('student')">Student Login</button>
+                <button id="faculty-btn" class="btn-login" onclick="setLoginType('faculty')">Faculty Login</button>
+            </div>
+            
+            <input type="text" id="username" class="input-field" placeholder="Enter username" required>
+            <input type="password" id="password" class="input-field" placeholder="Enter password" required>
+            
+            <button id="login-btn" class="btn-login" onclick="validateLogin()" disabled>Login</button>
+            
+            <div class="links">
+                <a href="#" onclick="handleForgotPassword()">Forgot password?</a>
+                <a href="signup.html">New Register!</a>
+            </div>
+            
+        
+        </div>                        
+    </div>
+</body>
+</html>
