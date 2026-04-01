@@ -1,8 +1,4 @@
-Database Pswd- N@ha11Thais20
-
--- =========================
 -- STUDENT TABLE
--- =========================
 CREATE TABLE student (
     name TEXT NOT NULL,
     rollno TEXT PRIMARY KEY,
@@ -12,9 +8,7 @@ CREATE TABLE student (
     contact TEXT NOT NULL
 );
 
--- =========================
 -- FACULTY TABLE
--- =========================
 CREATE TABLE faculty (
     name TEXT NOT NULL,
     faculty_id TEXT PRIMARY KEY,
@@ -22,9 +16,7 @@ CREATE TABLE faculty (
     image_url TEXT
 );
 
--- =========================
 -- COURSE TABLE
--- =========================
 CREATE TABLE course (
     course_id TEXT PRIMARY KEY,
     course_name TEXT NOT NULL,
@@ -32,9 +24,7 @@ CREATE TABLE course (
     semester INT
 );
 
--- =========================
 -- STUDENT ENROLLED TABLE
--- =========================
 CREATE TABLE student_enrolled (
     rollno TEXT,
     branch TEXT,
@@ -48,9 +38,7 @@ CREATE TABLE student_enrolled (
     FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id) ON DELETE SET NULL
 );
 
--- =========================
 -- FACULTY ENROLLED TABLE
--- =========================
 CREATE TABLE faculty_enrolled (
     faculty_id TEXT,
     course_id TEXT,
@@ -62,9 +50,7 @@ CREATE TABLE faculty_enrolled (
     FOREIGN KEY (course_id) REFERENCES course(course_id) ON DELETE CASCADE
 );
 
--- =========================
 -- ATTENDANCE TABLE
--- =========================
 CREATE TABLE attendance (
     rollno TEXT,
     course_id TEXT,
@@ -80,28 +66,8 @@ CREATE TABLE attendance (
     FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id) ON DELETE SET NULL
 );
 
-cmd
-Generate requirements.txt
-pip freeze > requirements.txt
 
-Step 3: Install in another environment
-If you or someone else wants to recreate this environment, just run:
-pip install -r requirements.txt
-
-
-git bash
---------
-git init
-git rm -r --cached myenv
-git add .
-git commit -m "Initial commit - face recognition attendance system"
-git remote add origin https://github.com/Nei-ha/face-recognition-attendance-system.git
-git branch -M main
-git push -u origin main
-
--- =========================
 -- STUDENT CREDENTIALS TABLE
--- =========================
 CREATE TABLE student_credentials (
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
@@ -110,9 +76,8 @@ CREATE TABLE student_credentials (
     FOREIGN KEY (rollno) REFERENCES student(rollno) ON DELETE CASCADE
 );
 
--- =========================
+
 -- FACULTY CREDENTIALS TABLE
--- =========================
 CREATE TABLE faculty_credentials (
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
